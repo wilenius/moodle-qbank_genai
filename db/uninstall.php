@@ -17,7 +17,7 @@
 /**
  * Code that is executed before the tables and data are dropped during the plugin uninstallation.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    upgrade
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,7 +26,7 @@
 /**
  * Custom uninstallation procedure.
  */
-function xmldb_local_aiquestions_uninstall() {
+function xmldb_qbank_genai_uninstall() {
 
     return true;
 }

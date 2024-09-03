@@ -17,7 +17,7 @@
 /**
  * CLI utility to test create questions.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    admin
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -37,6 +37,5 @@ $gift = "
     ~ 5
 }";
 
-$question = local_aiquestions_create_questions(2, null, $gift, 1, 3);
+$question = qbank_genai_create_questions(2, null, $gift, 1, 3);
 var_dump($question);
-

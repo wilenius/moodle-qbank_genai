@@ -17,14 +17,14 @@
 /**
  * Plugin version and other meta-data are defined here.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_aiquestions';
+$plugin->component = 'qbank_genai';
 $plugin->release = '1.0';
 $plugin->version = 202311230001;
 $plugin->requires = 2022041900;

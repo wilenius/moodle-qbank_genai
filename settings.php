@@ -17,7 +17,7 @@
 /**
  * Plugin administration pages are defined here.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    admin
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,16 +26,16 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
-    $settings = new admin_settingpage('local_aiquestions_settings', new lang_string('pluginname', 'local_aiquestions'));
+    $settings = new admin_settingpage('qbank_genai_settings', new lang_string('pluginname', 'qbank_genai'));
 
     // Language model provider.
     $provideroptions = ['OpenAI' => 'OpenAI',
-                'Azure' => 'Azure'
+                'Azure' => 'Azure',
                 ];
     $settings->add( new admin_setting_configselect(
-        'local_aiquestions/provider',
-        get_string('provider', 'local_aiquestions'),
-        get_string('providerdesc', 'local_aiquestions'),
+        'qbank_genai/provider',
+        get_string('provider', 'qbank_genai'),
+        get_string('providerdesc', 'qbank_genai'),
         'OpenAI',
         $provideroptions,
     ));
@@ -43,90 +43,90 @@ if ($hassiteconfig) {
     // Azure endpoint.
 
     $settings->add(new admin_setting_configtext(
-    'local_aiquestions/azure_api_endpoint',
-    get_string('azureapiendpoint', 'local_aiquestions'),
-    get_string('azureapiendpointdesc', 'local_aiquestions'),
+    'qbank_genai/azure_api_endpoint',
+    get_string('azureapiendpoint', 'qbank_genai'),
+    get_string('azureapiendpointdesc', 'qbank_genai'),
     '', PARAM_URL
     ));
 
 
     // OpenAI key.
     $settings->add( new admin_setting_configpasswordunmask(
-        'local_aiquestions/key',
-        get_string('openaikey', 'local_aiquestions'),
-        get_string('openaikeydesc', 'local_aiquestions'),
+        'qbank_genai/key',
+        get_string('openaikey', 'qbank_genai'),
+        get_string('openaikeydesc', 'qbank_genai'),
         '', PARAM_TEXT, 50
     ));
 
     // Model.
     $options = ['gpt-3.5-turbo' => 'gpt-3.5-turbo',
-                'gpt-4' => 'gpt-4'
+                'gpt-4' => 'gpt-4',
                 ];
     $settings->add( new admin_setting_configselect(
-        'local_aiquestions/model',
-        get_string('model', 'local_aiquestions'),
-        get_string('openaikeydesc', 'local_aiquestions'),
+        'qbank_genai/model',
+        get_string('model', 'qbank_genai'),
+        get_string('openaikeydesc', 'qbank_genai'),
         'gpt-3.5-turbo',
         $options,
     ));
 
     // Number of tries.
     $settings->add( new admin_setting_configtext(
-        'local_aiquestions/numoftries',
-        get_string('numoftriesset', 'local_aiquestions'),
-        get_string('numoftriesdesc', 'local_aiquestions'),
+        'qbank_genai/numoftries',
+        get_string('numoftriesset', 'qbank_genai'),
+        get_string('numoftriesdesc', 'qbank_genai'),
         10, PARAM_INT, 10
     ));
 
     // Presets
     $settings->add( new admin_setting_heading(
-        'local_aiquestions/presets',
-        get_string('presets', 'local_aiquestions'),
-        get_string('presetsdesc', 'local_aiquestions') .
-        get_string('shareyourprompts', 'local_aiquestions'),
+        'qbank_genai/presets',
+        get_string('presets', 'qbank_genai'),
+        get_string('presetsdesc', 'qbank_genai') .
+        get_string('shareyourprompts', 'qbank_genai'),
     ));
 
     for ($i = 1; $i <= 10; $i++) {
 
         // Preset header.
         $settings->add( new admin_setting_heading(
-            'local_aiquestions/preset' . $i,
-            get_string('preset', 'local_aiquestions') . " $i",
+            'qbank_genai/preset' . $i,
+            get_string('preset', 'qbank_genai') . " $i",
             null
         ));
 
         // Preset name.
         $settings->add( new admin_setting_configtext(
-            'local_aiquestions/presetname' . $i,
-            get_string('presetname', 'local_aiquestions'),
-            get_string('presetnamedesc', 'local_aiquestions'),
-            get_string('presetnamedefault' . $i, 'local_aiquestions'),
+            'qbank_genai/presetname' . $i,
+            get_string('presetname', 'qbank_genai'),
+            get_string('presetnamedesc', 'qbank_genai'),
+            get_string('presetnamedefault' . $i, 'qbank_genai'),
         ));
 
         // Preset primer.
         $settings->add( new admin_setting_configtextarea(
-            'local_aiquestions/presettprimer' . $i,
-            get_string('presetprimer', 'local_aiquestions'),
-            get_string('primer_help', 'local_aiquestions'),
-            get_string('presetprimerdefault' . $i, 'local_aiquestions'),
+            'qbank_genai/presettprimer' . $i,
+            get_string('presetprimer', 'qbank_genai'),
+            get_string('primer_help', 'qbank_genai'),
+            get_string('presetprimerdefault' . $i, 'qbank_genai'),
             PARAM_TEXT, 4000
         ));
 
         // Preset instructions.
         $settings->add( new admin_setting_configtextarea(
-            'local_aiquestions/presetinstructions' . $i,
-            get_string('presetinstructions', 'local_aiquestions'),
-            get_string('instructions_help', 'local_aiquestions'),
-            get_string('presetinstructionsdefault' . $i, 'local_aiquestions'),
+            'qbank_genai/presetinstructions' . $i,
+            get_string('presetinstructions', 'qbank_genai'),
+            get_string('instructions_help', 'qbank_genai'),
+            get_string('presetinstructionsdefault' . $i, 'qbank_genai'),
             PARAM_TEXT, 4000
         ));
 
         // Preset example.
         $settings->add( new admin_setting_configtextarea(
-            'local_aiquestions/presetexample' . $i,
-            get_string('presetexample', 'local_aiquestions'),
-            get_string('example_help', 'local_aiquestions'),
-            get_string('presetexampledefault' . $i, 'local_aiquestions'),
+            'qbank_genai/presetexample' . $i,
+            get_string('presetexample', 'qbank_genai'),
+            get_string('example_help', 'qbank_genai'),
+            get_string('presetexampledefault' . $i, 'qbank_genai'),
             PARAM_TEXT, 4000
         ));
 

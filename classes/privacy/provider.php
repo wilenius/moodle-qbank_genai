@@ -19,7 +19,7 @@ namespace local_aiquestions\privacy;
 /**
  * Privacy API implementation for the AI Text to questions generator plugin.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    privacy
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -31,7 +31,7 @@ class provider implements \core_privacy\local\metadata\null_provider {
      *
      * @return string
      */
-    public static function get_reason() : string {
+    public static function get_reason(): string {
         return 'privacy:metadata';
     }
 }

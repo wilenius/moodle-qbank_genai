@@ -17,12 +17,12 @@
 /**
  * Service for checking state of question generation.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    admin
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace local_aiquestions\external;
+namespace qbank_genai\external;
 defined('MOODLE_INTERNAL') || die();
 require_once("{$CFG->libdir}/externallib.php");
 
@@ -34,7 +34,7 @@ use external_value;
 /**
  * Service for checking state of question generation.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    admin
  */
 class check_state extends \external_api {
@@ -80,7 +80,7 @@ class check_state extends \external_api {
         $userid = $params['userid'];
         $uniqid = $params['uniqid'];
 
-        $state = $DB->get_record('local_aiquestions', ['userid' => $userid, 'uniqid' => $uniqid]);
+        $state = $DB->get_record('qbank_genai', ['userid' => $userid, 'uniqid' => $uniqid]);
 
         // Perform security checks.
         // Allow only the user to check his own state.
@@ -91,7 +91,7 @@ class check_state extends \external_api {
         // If there is not yet data in table (adhoc didn't start yet).
         if (!$state) {
             $info['tries'] = 0;
-            $info['numoftries'] = get_config('local_aiquestions', 'numoftries');
+            $info['numoftries'] = get_config('qbank_genai', 'numoftries');
             $info['state'] = 0;
             $info['success'] = '';
             $data[] = $info;
@@ -119,4 +119,3 @@ class check_state extends \external_api {
         return $data;
     }
 }
-

@@ -17,24 +17,24 @@
 /**
  * Plugin administration pages are defined here.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    admin
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__ . '/../../config.php');
+require(__DIR__ . '/../../../config.php');
 defined('MOODLE_INTERNAL') || die();
 require_login();
 
 $PAGE->set_context(context_system::instance());
-$PAGE->set_heading(get_string('pluginname', 'local_aiquestions'));
-$PAGE->set_title(get_string('pluginname', 'local_aiquestions'));
+$PAGE->set_heading(get_string('pluginname', 'qbank_genai'));
+$PAGE->set_title(get_string('pluginname', 'qbank_genai'));
 $PAGE->set_url('/local/aiquestions/');
 $PAGE->set_pagelayout('standard');
-$PAGE->navbar->add(get_string('pluginname', 'local_aiquestions'), new moodle_url('/local/aiquestions/'));
+$PAGE->navbar->add(get_string('pluginname', 'qbank_genai'), new moodle_url('/local/aiquestions/'));
 
 
 echo $OUTPUT->header();
-echo $OUTPUT->render_from_template('local_aiquestions/index', []);
+echo $OUTPUT->render_from_template('qbank_genai/index', []);
 echo $OUTPUT->footer();

@@ -17,7 +17,7 @@
 /**
  * Plugin upgrade steps are defined here.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    upgrade
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -28,18 +28,18 @@ defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__.'/upgradelib.php');
 
 /**
- * Execute local_aiquestions upgrade from the given old version.
+ * Execute qbank_genai upgrade from the given old version.
  *
  * @param int $oldversion
  * @return bool
  */
-function xmldb_local_aiquestions_upgrade($oldversion) {
+function xmldb_qbank_genai_upgrade($oldversion) {
     global $DB;
 
     $dbman = $DB->get_manager();
     if ($oldversion < 2023043001) {
-        // Define table local_aiquestions to be created.
-        $table = new xmldb_table('local_aiquestions');
+        // Define table qbank_genai to be created.
+        $table = new xmldb_table('qbank_genai');
 
         // Adding fields to table.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
@@ -52,10 +52,10 @@ function xmldb_local_aiquestions_upgrade($oldversion) {
         $table->add_field('datecreated', XMLDB_TYPE_INTEGER, '20', null, null, null, null);
         $table->add_field('datemodified', XMLDB_TYPE_INTEGER, '20', null, null, null, null);
 
-        // Adding keys to table local_aiquestions.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        // Adding keys to table qbank_genai.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
 
-        // Conditionally launch create table for local_aiquestions.
+        // Conditionally launch create table for qbank_genai.
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         }
@@ -63,8 +63,8 @@ function xmldb_local_aiquestions_upgrade($oldversion) {
     }
 
     if ($oldversion < 2023050501) {
-        // Add numoftries local_aiquestions.
-        $table = new xmldb_table('local_aiquestions');
+        // Add numoftries qbank_genai.
+        $table = new xmldb_table('qbank_genai');
         $field = new xmldb_field('numoftries', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'tries');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
@@ -74,7 +74,7 @@ function xmldb_local_aiquestions_upgrade($oldversion) {
 
     if ($oldversion < 2023053000) {
         // Rename user field to userid.
-        $table = new xmldb_table('local_aiquestions');
+        $table = new xmldb_table('qbank_genai');
         $field = new xmldb_field('user', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, 'course');
         if ($dbman->field_exists($table, $field)) {
             $dbman->rename_field($table, $field, 'userid');

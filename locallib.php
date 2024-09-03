@@ -17,7 +17,7 @@
 /**
  * Plugin administration pages are defined here.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    admin
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -30,7 +30,7 @@
  * @param object data data to create questions from
  * @return object questions of generated questions
  */
-function local_aiquestions_get_questions($data) {
+function qbank_genai_get_questions($data) {
 
     global $CFG;
 
@@ -38,19 +38,19 @@ function local_aiquestions_get_questions($data) {
     $primer = $data->primer;
     $primer .= "Write $data->numofquestions questions.";
 
-    $key = get_config('local_aiquestions', 'key');
-    $model = get_config('local_aiquestions', 'model');
-    $provider = get_config('local_aiquestions', 'provider'); // OpenAI (default) or Azure
-    
+    $key = get_config('qbank_genai', 'key');
+    $model = get_config('qbank_genai', 'model');
+    $provider = get_config('qbank_genai', 'provider'); // OpenAI (default) or Azure
+
     if ($provider === 'Azure') {
-    // If the provider is Azure, use the Azure API endpoint and Azure-specific HTTP header
-    $url = get_config('local_aiquestions', 'azure_api_endpoint'); // Use the Azure API endpoint from settings
-    $authorization = "api-key: " . $key;
-} else {
-    // If the provider is not Azure, use the OpenAI API URL and OpenAI style HTTP header
-    $url = 'https://api.openai.com/v1/chat/completions';
-    $authorization = "Authorization: Bearer " . $key;
-}
+        // If the provider is Azure, use the Azure API endpoint and Azure-specific HTTP header
+        $url = get_config('qbank_genai', 'azure_api_endpoint'); // Use the Azure API endpoint from settings
+        $authorization = "api-key: " . $key;
+    } else {
+        // If the provider is not Azure, use the OpenAI API URL and OpenAI style HTTP header
+        $url = 'https://api.openai.com/v1/chat/completions';
+        $authorization = "Authorization: Bearer " . $key;
+    }
     // Remove new lines and carriage returns.
     $story = str_replace("\n", " ", $data->story);
     $story = str_replace("\r", " ", $story);
@@ -65,11 +65,11 @@ function local_aiquestions_get_questions($data) {
             {"role": "system", "content": "' . $primer . '"},
             {"role": "system", "name":"example_user", "content": "' . $instructions . '"},
             {"role": "system", "name": "example_assistant", "content": "' . $example . '"},
-            {"role": "user", "content": "Now, create ' . $data->numofquestions . ' questions for me based on this topic: ' . local_aiquestions_escape_json($story) . '"}
+            {"role": "user", "content": "Now, create ' . $data->numofquestions . ' questions for me based on this topic: ' . qbank_genai_escape_json($story) . '"}
 	    ]}';
 
     $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json' , $authorization ));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json' , $authorization ]);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
@@ -96,10 +96,10 @@ function local_aiquestions_get_questions($data) {
  * @param string $gift questions in GIFT format
  * @param int $numofquestions number of questions to generate
  * @param int $userid user id
- * @param bool $addidentifier add an GPT prefix to question names 
+ * @param bool $addidentifier add an GPT prefix to question names
  * @return array of objects of created questions
  */
-function local_aiquestions_create_questions($courseid, $category, $gift, $numofquestions, $userid, $addidentifier) {
+function qbank_genai_create_questions($courseid, $category, $gift, $numofquestions, $userid, $addidentifier) {
     global $CFG, $USER, $DB;
 
     require_once($CFG->libdir . '/questionlib.php');
@@ -112,7 +112,7 @@ function local_aiquestions_create_questions($courseid, $category, $gift, $numofq
 
     // Get question category TODO: there is probably a better way to do this.
     if ($category) {
-        $categoryids = explode(',',$category);
+        $categoryids = explode(',', $category);
         $categoryid = $categoryids[0];
         $categorycontextid = $categoryids[1];
         $category = $DB->get_record('question_categories', ['id' => $categoryid, 'contextid' => $categorycontextid]);
@@ -172,9 +172,9 @@ function local_aiquestions_create_questions($courseid, $category, $gift, $numofq
  * @param string $value json to escape
  * @return string result escaped json
  */
-function local_aiquestions_escape_json($value) {
-    $escapers = array("\\", "/", "\"", "\n", "\r", "\t", "\x08", "\x0c");
-    $replacements = array("\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t", "\\f", "\\b");
+function qbank_genai_escape_json($value) {
+    $escapers = ["\\", "/", "\"", "\n", "\r", "\t", "\x08", "\x0c"];
+    $replacements = ["\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t", "\\f", "\\b"];
     $result = str_replace($escapers, $replacements, $value);
     return $result;
 }
@@ -185,7 +185,7 @@ function local_aiquestions_escape_json($value) {
  * @param string $gift questions in GIFT format
  * @return bool true if valid, false if not
  */
-function local_aiquestions_check_gift($gift) {
+function qbank_genai_check_gift($gift) {
     $questions = explode("\n\n", $gift);
 
     foreach ($questions as $question) {
@@ -216,4 +216,3 @@ function local_aiquestions_check_gift($gift) {
     }
     return true;
 }
-

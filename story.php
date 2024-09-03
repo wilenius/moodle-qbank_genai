@@ -17,51 +17,64 @@
 /**
  * Plugin administration pages are defined here.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    admin
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__ . '/../../config.php');
+require(__DIR__ . '/../../../config.php');
+require_once($CFG->dirroot . '/question/editlib.php');
+
 defined('MOODLE_INTERNAL') || die();
 
-// Get course id for creating the questions in it's bank.
-$courseid = optional_param('courseid', 0, PARAM_INT);
+core_question\local\bank\helper::require_plugin_enabled('qbank_importquestions');
 
-if ($courseid == 0) {
-    redirect(new moodle_url('/local/aiquestions/index.php'));
+list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) = question_edit_setup('import', '/question/bank/aigen/story.php');
+
+list($catid, $catcontext) = explode(',', $pagevars['cat']);
+if (!$category = $DB->get_record("question_categories", ['id' => $catid])) {
+    throw new moodle_exception('nocategory', 'question');
 }
 
-require_login($courseid);
+$categorycontext = context::instance_by_id($category->contextid);
+$category->context = $categorycontext;
 
-// Check if the user has the capability to create questions.
-$context = context_course::instance($courseid);
-require_capability('moodle/question:add', $context);
+// This page can be called without courseid or cmid in which case.
+// We get the context from the category object.
+if ($contexts === null) { // Need to get the course from the chosen category.
+    $contexts = new core_question\local\bank\question_edit_contexts($categorycontext);
+    $thiscontext = $contexts->lowest();
+    if ($thiscontext->contextlevel == CONTEXT_COURSE) {
+        require_login($thiscontext->instanceid, false);
+    } else if ($thiscontext->contextlevel == CONTEXT_MODULE) {
+        list($module, $cm) = get_module_from_cmid($thiscontext->instanceid);
+        require_login($cm->course, false, $cm);
+    }
+    $contexts->require_one_edit_tab_cap($edittab);
+}
+
+$PAGE->set_url($thispageurl);
 
 require_once("$CFG->libdir/formslib.php");
 require_once(__DIR__ . '/locallib.php');
 
-$PAGE->set_context(context_system::instance());
-$PAGE->set_heading(get_string('pluginname', 'local_aiquestions'));
-$PAGE->set_title(get_string('pluginname', 'local_aiquestions'));
-$PAGE->set_url('/local/aiquestions/story.php?courseid=' . $courseid);
+// $PAGE->set_context(\context_system::instance());
+$PAGE->set_heading(get_string('pluginname', 'qbank_genai'));
+$PAGE->set_title(get_string('pluginname', 'qbank_genai'));
 $PAGE->set_pagelayout('standard');
-$PAGE->navbar->add(get_string('pluginname', 'local_aiquestions'), new moodle_url('/local/aiquestions/'));
-$PAGE->navbar->add(get_string('story', 'local_aiquestions'),
-                    new moodle_url('/local/aiquestions/story.php?courseid=' . $courseid));
-$PAGE->requires->js_call_amd('local_aiquestions/state');
+$PAGE->requires->js_call_amd('qbank_genai/state');
 
 echo $OUTPUT->header();
 
-$mform = new local_aiquestions_story_form();
+$mform = new \qbank_genai\story_form(null, ['contexts' => $contexts]);
 
 if ($mform->is_cancelled()) {
     redirect($CFG->wwwroot . '/course/view.php?id=' . $courseid);
 } else if ($data = $mform->get_data()) {
 
     // Call the adhoc task.
-    $task = new \local_aiquestions\task\questions();
+    $task = new \qbank_genai\task\questions();
     if ($task) {
         $uniqid = uniqid($USER->id, true);
         $preset = $data->preset;
@@ -79,10 +92,10 @@ if ($mform->is_cancelled()) {
                                 'userid' => $USER->id,
                                 'uniqid' => $uniqid ]);
         \core\task\manager::queue_adhoc_task($task);
-        $success = get_string('tasksuccess', 'local_aiquestions');
+        $success = get_string('tasksuccess', 'qbank_genai');
 
     } else {
-        $error = get_string('taskerror', 'local_aiquestions');
+        $error = get_string('taskerror', 'qbank_genai');
     }
     // Check if the cron is overdue.
     $lastcron = get_config('tool_task', 'lastcronstart');
@@ -97,7 +110,7 @@ if ($mform->is_cancelled()) {
         'cron' => $cronoverdue,
     ];
     // Load the ready template.
-    echo $OUTPUT->render_from_template('local_aiquestions/loading', $datafortemplate);
+    echo $OUTPUT->render_from_template('qbank_genai/loading', $datafortemplate);
 } else {
     $mform->display();
 }

@@ -17,20 +17,20 @@
 /**
  * Adhoc task for questions generation.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    admin
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_aiquestions\task;
+namespace qbank_genai\task;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
  * The question generator adhoc task.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    admin
  */
 class questions extends \core\task\adhoc_task {
@@ -43,7 +43,7 @@ class questions extends \core\task\adhoc_task {
         global $DB, $CFG;
         require_once(__DIR__ . '/../../locallib.php');
         // Read numoftries from settings.
-        $numoftries = get_config('local_aiquestions', 'numoftries');
+        $numoftries = get_config('qbank_genai', 'numoftries');
 
         // Get the data from the task.
         $data = $this->get_custom_data();
@@ -67,7 +67,7 @@ class questions extends \core\task\adhoc_task {
         $dbrecord->uniqid = $uniqid;
         $dbrecord->gift = '';
         $dbrecord->success = '';
-        $inserted = $DB->insert_record('local_aiquestions', $dbrecord);
+        $inserted = $DB->insert_record('qbank_genai', $dbrecord);
 
         // Create questions.
         $created = false;
@@ -75,8 +75,8 @@ class questions extends \core\task\adhoc_task {
         $error = ''; // Error message.
         $update = new \stdClass();
 
-        echo "[local_aiquestions] Creating Questions via OpenAI...\n";
-        echo "[local_aiquestions] Try $i of $numoftries...\n";
+        echo "[qbank_genai] Creating Questions via OpenAI...\n";
+        echo "[qbank_genai] Try $i of $numoftries...\n";
 
         while (!$created && $i <= $numoftries) {
 
@@ -84,25 +84,25 @@ class questions extends \core\task\adhoc_task {
             $update->id = $inserted;
             $update->tries = $i;
             $update->datemodified = time();
-            $DB->update_record('local_aiquestions', $update);
+            $DB->update_record('qbank_genai', $update);
 
             // Get questions from ChatGPT API.
-            $questions = \local_aiquestions_get_questions($data);
+            $questions = \qbank_genai_get_questions($data);
 
             // Print error message of ChatGPT API (if there are).
             if (isset($questions->error->message)) {
                 $error .= $questions->error->message;
 
                 // Print error message to cron/adhoc output.
-                echo "[local_aiquestions] Error : $error.\n";
+                echo "[qbank_genai] Error : $error.\n";
             }
 
             // Check gift format.
             if (property_exists($questions, 'text')) {
-                if (\local_aiquestions_check_gift($questions->text)) {
+                if (\qbank_genai_check_gift($questions->text)) {
 
                     // Create the questions, return an array of objetcs of the created questions.
-                    $created = \local_aiquestions_create_questions($courseid, $category, $questions->text, $numofquestions, $userid, $addidentifier);
+                    $created = \qbank_genai_create_questions($courseid, $category, $questions->text, $numofquestions, $userid, $addidentifier);
                     $j = 0;
                     foreach ($created as $question) {
                         $success[$j]['id'] = $question->id;
@@ -110,7 +110,7 @@ class questions extends \core\task\adhoc_task {
                         $j++;
                     }
 
-                    echo "[local_aiquestions] Successfully created $j questions!\n";
+                    echo "[qbank_genai] Successfully created $j questions!\n";
 
                     // Insert success creation info to DB.
                     $update->id = $inserted;
@@ -118,10 +118,10 @@ class questions extends \core\task\adhoc_task {
                     $update->tries = $i;
                     $update->success = json_encode(array_values($success));
                     $update->datemodified = time();
-                    $DB->update_record('local_aiquestions', $update);
+                    $DB->update_record('qbank_genai', $update);
                 }
             } else {
-                echo "[local_aiquestions] Error: No question text returned \n";
+                echo "[qbank_genai] Error: No question text returned \n";
             }
             $i++;
         }
@@ -134,13 +134,13 @@ class questions extends \core\task\adhoc_task {
             $update->tries = $i - 1;
             $update->timemodified = time();
             $update->success = 0;
-            $DB->update_record('local_aiquestions', $update);
+            $DB->update_record('qbank_genai', $update);
         }
 
         // Print error message.
         // It will be shown on cron/adhoc output (file/whatever).
         if ($error != '') {
-            echo '[local_aiquestions adhoc_task]' . $error;
+            echo '[qbank_genai adhoc_task]' . $error;
         }
     }
 }

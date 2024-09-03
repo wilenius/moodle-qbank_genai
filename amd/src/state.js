@@ -22,7 +22,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery', 'core/ajax', 'core/templates', 'core/str'], function($, Ajax, Templates, str) {
+define(['jquery', 'core/ajax', 'core/templates'], function($, Ajax, Templates) {
     // Load the state of the questions generation every 20 seconds.
     var intervalId = setInterval(function() {
         checkState(intervalId);
@@ -36,10 +36,10 @@ define(['jquery', 'core/ajax', 'core/templates', 'core/str'], function($, Ajax, 
      *  checkState(intervalId);
      */
     function checkState(intervalId) {
-        var userid = $("#local_aiquestions_userid")[0].outerText;
-        var uniqid = $("#local_aiquestions_uniqid")[0].outerText;
+        var userid = $("#qbank_genai_userid")[0].outerText;
+        var uniqid = $("#qbank_genai_uniqid")[0].outerText;
         var promises = Ajax.call([{
-            methodname: 'local_aiquestions_check_state',
+            methodname: 'qbank_genai_check_state',
             args: {
                 userid: userid,
                 uniqid: uniqid
@@ -59,11 +59,11 @@ define(['jquery', 'core/ajax', 'core/templates', 'core/str'], function($, Ajax, 
                 } else {
                     var error = '';
                 }
-                Templates.render('local_aiquestions/success', { success: successmessage,
+                Templates.render('qbank_genai/success', { success: successmessage,
                                                                 wwwroot: M.cfg.wwwroot,
                                                                 error: error,
                                                                 single: single }).then(function(html) {
-                    $("#local_aiquestions_success").html(html);
+                    $("#qbank_genai_success").html(html);
                 });
                 // Stop checking the state while questions are ready.
                 clearInterval(intervalId);
@@ -76,10 +76,10 @@ define(['jquery', 'core/ajax', 'core/templates', 'core/str'], function($, Ajax, 
                 } else {
                     var percent = Math.round((showSuccess[0].tries / showSuccess[0].numoftries) * 100);
                 }
-                Templates.render('local_aiquestions/info', { tries: showSuccess[0].tries,
+                Templates.render('qbank_genai/info', { tries: showSuccess[0].tries,
                                                              numoftries: showSuccess[0].numoftries,
                                                              percent: percent }).then(function(html) {
-                    $("#local_aiquestions_info").html(html);
+                    $("#qbank_genai_info").html(html);
                 });
             }
         });

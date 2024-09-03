@@ -17,11 +17,14 @@
 /**
  * Story Form Class is defined here.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    admin
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+
+namespace qbank_genai;
 
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
@@ -29,53 +32,52 @@ require_once($CFG->libdir . '/formslib.php');
 /**
  * Form to get the story from the user.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    admin
  */
-class local_aiquestions_story_form extends moodleform {
+class story_form extends \moodleform {
     /**
      * Defines forms elements
      */
     public function definition() {
-        global $courseid;
+
         $mform = $this->_form;
+        $contexts = $this->_customdata['contexts']->having_cap('moodle/question:add');
 
         // Question category.
-        $contexts = [context_course::instance($courseid)];
-        $mform->addElement('questioncategory', 'category', get_string('category', 'question'),
-            array('contexts'=>$contexts));
-        $mform->addHelpButton('category', 'category', 'local_aiquestions');
+        $mform->addElement('questioncategory', 'category', get_string('category', 'question'), ['contexts' => $contexts]);
+        $mform->addHelpButton('category', 'category', 'qbank_genai');
 
         // Number of questions.
         $defaultnumofquestions = 4;
-        $select = $mform->addElement('select', 'numofquestions', get_string('numofquestions', 'local_aiquestions'),
-            array('1' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9, '10' => 10));
+        $select = $mform->addElement('select', 'numofquestions', get_string('numofquestions', 'qbank_genai'),
+            ['1' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9, '10' => 10]);
         $select->setSelected($defaultnumofquestions);
         $mform->setType('numofquestions', PARAM_INT);
 
         // Story.
-        $mform->addElement('textarea', 'story', get_string('story', 'local_aiquestions'),
+        $mform->addElement('textarea', 'story', get_string('story', 'qbank_genai'),
             'wrap="virtual" rows="10" cols="50"'); // This model's maximum context length is 4097 tokens. We limit the story to 4096 tokens.
         $mform->setType('story', PARAM_RAW);
-        $mform->addHelpButton('story', 'story', 'local_aiquestions');
+        $mform->addHelpButton('story', 'story', 'qbank_genai');
 
         // Add "GPT-created" to question name.
-        $mform->addElement('checkbox', 'addidentifier', get_string('addidentifier', 'local_aiquestions'));
+        $mform->addElement('checkbox', 'addidentifier', get_string('addidentifier', 'qbank_genai'));
         $mform->setDefault('addidentifier', 1); // Default of "yes"
         $mform->setType('addidentifier', PARAM_BOOL);
 
         // Preset.
-        $presets = array();
+        $presets = [];
         for ($i = 0; $i < 10; $i++) {
-            if ($presetname = get_config('local_aiquestions', 'presetname' . $i)) {
+            if ($presetname = get_config('qbank_genai', 'presetname' . $i)) {
                 $presets[] = $presetname;
             }
         }
-        $mform->addElement('select', 'preset', get_string('preset', 'local_aiquestions'), $presets);
+        $mform->addElement('select', 'preset', get_string('preset', 'qbank_genai'), $presets);
 
         // Edit preset.
-        $mform->addElement('checkbox', 'editpreset', get_string('editpreset', 'local_aiquestions'));
-        $mform->addElement('html', get_string('shareyourprompts', 'local_aiquestions'));
+        $mform->addElement('checkbox', 'editpreset', get_string('editpreset', 'qbank_genai'));
+        $mform->addElement('html', get_string('shareyourprompts', 'qbank_genai'));
 
         // Create elements for all presets.
         for ($i = 0; $i < 10; $i++) {
@@ -83,42 +85,38 @@ class local_aiquestions_story_form extends moodleform {
             $primer = $i + 1;
 
             // Primer.
-            $mform->addElement('textarea', 'primer' . $i, get_string('primer', 'local_aiquestions'),
+            $mform->addElement('textarea', 'primer' . $i, get_string('primer', 'qbank_genai'),
                 'wrap="virtual" rows="10" cols="50"');
             $mform->setType('primer' . $i, PARAM_RAW);
-            $mform->setDefault('primer' . $i, get_config('local_aiquestions', 'presettprimer' . $primer));
-            $mform->addHelpButton('primer' . $i, 'primer', 'local_aiquestions');
+            $mform->setDefault('primer' . $i, get_config('qbank_genai', 'presettprimer' . $primer));
+            $mform->addHelpButton('primer' . $i, 'primer', 'qbank_genai');
             $mform->hideif('primer' . $i, 'editpreset');
             $mform->hideif('primer' . $i, 'preset', 'neq', $i);
 
             // Instructions.
-            $mform->addElement('textarea', 'instructions' . $i, get_string('instructions', 'local_aiquestions'),
+            $mform->addElement('textarea', 'instructions' . $i, get_string('instructions', 'qbank_genai'),
             'wrap="virtual" rows="10" cols="50"');
             $mform->setType('instructions' . $i, PARAM_RAW);
-            $mform->setDefault('instructions' . $i, get_config('local_aiquestions', 'presetinstructions' . $primer));
-            $mform->addHelpButton('instructions' . $i, 'instructions', 'local_aiquestions');
+            $mform->setDefault('instructions' . $i, get_config('qbank_genai', 'presetinstructions' . $primer));
+            $mform->addHelpButton('instructions' . $i, 'instructions', 'qbank_genai');
             $mform->hideif('instructions' . $i, 'editpreset');
             $mform->hideif('instructions' . $i, 'preset', 'neq', $i);
 
             // Example.
-            $mform->addElement('textarea', 'example' . $i, get_string('example', 'local_aiquestions'),
+            $mform->addElement('textarea', 'example' . $i, get_string('example', 'qbank_genai'),
             'wrap="virtual" rows="10" cols="50"');
             $mform->setType('example' . $i, PARAM_RAW);
-            $mform->setDefault('example' . $i, get_config('local_aiquestions', 'presetexample' . $primer));
-            $mform->addHelpButton('example' . $i, 'example', 'local_aiquestions');
+            $mform->setDefault('example' . $i, get_config('qbank_genai', 'presetexample' . $primer));
+            $mform->addHelpButton('example' . $i, 'example', 'qbank_genai');
             $mform->hideif('example' . $i, 'editpreset');
             $mform->hideif('example' . $i, 'preset', 'neq', $i);
 
         }
 
-        // Courseid.
-        $mform->addElement('hidden', 'courseid', $courseid);
-        $mform->setType('courseid', PARAM_INT);
-
-        $buttonarray = array();
-        $buttonarray[] =& $mform->createElement('submit', 'submitbutton', get_string('generate', 'local_aiquestions'));
-        $buttonarray[] =& $mform->createElement('cancel', 'cancel', get_string('backtocourse', 'local_aiquestions'));
-        $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
+        $buttonarray = [];
+        $buttonarray[] =& $mform->createElement('submit', 'submitbutton', get_string('generate', 'qbank_genai'));
+        $buttonarray[] =& $mform->createElement('cancel', 'cancel', get_string('backtocourse', 'qbank_genai'));
+        $mform->addGroup($buttonarray, 'buttonar', '', [' '], false);
     }
     /**
      * Form validation
@@ -128,6 +126,6 @@ class local_aiquestions_story_form extends moodleform {
      * @return array
      */
     public function validation($data, $files) {
-        return array();
+        return [];
     }
 }

@@ -17,7 +17,7 @@
 /**
  * Plugin administration pages are defined here.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    admin
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -29,31 +29,31 @@ defined('MOODLE_INTERNAL') || die();
  * @param settings_navigation $settingsnav
  * @param context $context
  */
-function local_aiquestions_extend_settings_navigation($settingsnav, $context) {
+function qbank_genai_extend_settings_navigation($settingsnav, $context) {
     global $CFG, $PAGE, $USER;
 
     // Add the AI Questions menu to the course administration menu only if the user has the permission to add questions.
     if (has_capability('moodle/question:add', $context)) {
 
         if ($settingnode = $settingsnav->find('courseadmin', navigation_node::TYPE_COURSE)) {
-            $strfather = get_string('aiquestions', 'local_aiquestions');
+            $strfather = get_string('aiquestions', 'qbank_genai');
             $fathernode = navigation_node::create(
                 $strfather,
                 null,
                 navigation_node::NODETYPE_BRANCH,
-                'local_aiquestions_father',
-                'local_aiquestions_father'
+                'qbank_genai_father',
+                'qbank_genai_father'
             );
 
             $settingnode->add_node($fathernode);
-            $strlist = get_string('story', 'local_aiquestions');
-            $url = new moodle_url('/local/aiquestions/story.php', array('courseid' => $PAGE->course->id));
+            $strlist = get_string('story', 'qbank_genai');
+            $url = new moodle_url('/local/aiquestions/story.php', ['courseid' => $PAGE->course->id]);
             $listnode = navigation_node::create(
                 $strlist,
                 $url,
                 navigation_node::NODETYPE_LEAF,
-                'local_aiquestions_story',
-                'local_aiquestions_story',
+                'qbank_genai_story',
+                'qbank_genai_story',
                 new pix_icon('f/avi-24', $strlist)
             );
 

@@ -17,7 +17,7 @@
 /**
  * Plugin strings are defined here.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    string
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,11 +26,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 // Basics.
+$string['aiquestions'] = 'AI Questions';
 $string['pluginname'] = 'AI text to questions generator';
 $string['pluginname_desc'] = 'This plugin allows you to automatically generate questions from a text using a language AI (eg chatGPT).';
 $string['pluginname_help'] = 'Use this plugin from the course administration menu or the question bank.';
 $string['privacy:metadata'] = 'AI text to questions generator does not store any personal data.';
-$string['aiquestions'] = 'AI Questions';
 
 // Settings page.
 $string['provider'] = 'GPT provider';

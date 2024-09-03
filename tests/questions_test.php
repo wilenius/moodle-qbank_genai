@@ -19,12 +19,12 @@ namespace local_aiquestions;
 /**
  * The createquestions test class.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    test
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class questions_test extends \advanced_testcase {
+final class questions_test extends \advanced_testcase {
 
     // Write the tests here as public funcions.
     // Please refer to {@link https://docs.moodle.org/dev/PHPUnit} for more details on PHPUnit tests in Moodle.
@@ -36,7 +36,7 @@ class questions_test extends \advanced_testcase {
      *
      * @coversNothing
      */
-    public function test_dummy() {
+    public function test_dummy(): void {
         $this->assertTrue(true);
     }
 
@@ -44,7 +44,7 @@ class questions_test extends \advanced_testcase {
      * Test local_aiquestions_create_questions.
      * @covers \local_aiquestions_create_questions
      */
-    public function test_create_questions() {
+    public function test_create_questions(): void {
         require_once(__DIR__ . '/../locallib.php');
         $this->resetAfterTest(true);
         $gift = "
@@ -69,7 +69,7 @@ class questions_test extends \advanced_testcase {
      * Test local_aiquestions_escape_json.
      * @covers \local_aiquestions_escape_json
      */
-    public function test_escape_json() {
+    public function test_escape_json(): void {
         require_once(__DIR__ . '/../locallib.php');
         $myjson = '{"name":"My long
             text with new line"}';
@@ -81,7 +81,7 @@ class questions_test extends \advanced_testcase {
      * Test local_aiquestions_check_gift.
      * @covers \local_aiquestions_check_gift
      */
-    public function test_check_gift() {
+    public function test_check_gift(): void {
         require_once(__DIR__ . '/../locallib.php');
         $gift = "::My interesting questionText
             {

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/aiquestions/db" VERSION="20230430" COMMENT="XMLDB file for Moodle local/aiquestions"
+<XMLDB PATH="question/bank/genai/db" VERSION="20230430" COMMENT="XMLDB file for Moodle qtype_genai"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="local_aiquestions" COMMENT="Ai Questions table">
+    <TABLE NAME="qbank_genai" COMMENT="Ai Questions table">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="numoftries" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Number of tries"/>

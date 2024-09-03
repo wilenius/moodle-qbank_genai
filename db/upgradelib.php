@@ -17,7 +17,7 @@
 /**
  * Plugin upgrade helper functions are defined here.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    upgrade
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,7 +26,7 @@
 /**
  * Helper function used by the upgrade.php file.
  */
-function local_aiquestions_helper_function() {
+function qbank_genai_helper_function() {
     global $DB;
 
     // Please note: you can only use raw low level database access here.

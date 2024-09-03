@@ -17,7 +17,7 @@
 /**
  * CLI utility to check cron state.
  *
- * @package     local_aiquestions
+ * @package     qbank_genai
  * @category    admin
  * @copyright   2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -42,4 +42,3 @@ echo "ExpectedFrequency: $expectedfrequency \n";
 
 $croninfrequent = !$cronoverdue && ($lastcroninterval > ($expectedfrequency + MINSECS) || $lastcron < time() - $expectedfrequency);
 echo "CronInfrequent: $croninfrequent \n";
-
