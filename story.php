@@ -28,7 +28,7 @@ require_once($CFG->dirroot . '/question/editlib.php');
 
 defined('MOODLE_INTERNAL') || die();
 
-core_question\local\bank\helper::require_plugin_enabled('qbank_importquestions');
+core_question\local\bank\helper::require_plugin_enabled('qbank_genai');
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) = question_edit_setup('import', '/question/bank/aigen/story.php');
 
@@ -67,10 +67,10 @@ $PAGE->requires->js_call_amd('qbank_genai/state');
 
 echo $OUTPUT->header();
 
-$mform = new \qbank_genai\story_form(null, ['contexts' => $contexts]);
+$mform = new \qbank_genai\story_form(null, ['contexts' => $contexts, 'cmid' => $cmid]);
 
 if ($mform->is_cancelled()) {
-    redirect($CFG->wwwroot . '/course/view.php?id=' . $courseid);
+    redirect($CFG->wwwroot . '/question/edit.php?cmid=' . $cmid);
 } else if ($data = $mform->get_data()) {
 
     // Call the adhoc task.
@@ -81,19 +81,19 @@ if ($mform->is_cancelled()) {
         $primer = 'primer' . $preset;
         $instructions = 'instructions' . $preset;
         $example = 'example' . $preset;
-        $task->set_custom_data(['category' => $data->category,
-                                'primer' => $data->$primer,
-                                'instructions' => $data->$instructions,
-                                'example' => $data->$example,
-                                'story' => $data->story,
-                                'numofquestions' => $data->numofquestions,
-                                'addidentifier' => $data->addidentifier,
-                                'courseid' => $data->courseid,
-                                'userid' => $USER->id,
-                                'uniqid' => $uniqid ]);
+        $task->set_custom_data([
+            'category' => $data->category,
+            'primer' => $data->$primer,
+            'instructions' => $data->$instructions,
+            'example' => $data->$example,
+            'story' => $data->story,
+            'numofquestions' => $data->numofquestions,
+            'addidentifier' => $data->addidentifier,
+            'userid' => $USER->id,
+            'uniqid' => $uniqid
+        ]);
         \core\task\manager::queue_adhoc_task($task);
         $success = get_string('tasksuccess', 'qbank_genai');
-
     } else {
         $error = get_string('taskerror', 'qbank_genai');
     }
@@ -103,7 +103,6 @@ if ($mform->is_cancelled()) {
 
     // Prepare the data for the template.
     $datafortemplate = [
-        'courseid' => $courseid,
         'wwwroot' => $CFG->wwwroot,
         'uniqid' => $uniqid,
         'userid' => $USER->id,

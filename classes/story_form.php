@@ -113,6 +113,10 @@ class story_form extends \moodleform {
 
         }
 
+        // Cmid.
+        $mform->addElement('hidden', 'cmid', $this->_customdata['cmid']);
+        $mform->setType('cmid', PARAM_INT);
+
         $buttonarray = [];
         $buttonarray[] =& $mform->createElement('submit', 'submitbutton', get_string('generate', 'qbank_genai'));
         $buttonarray[] =& $mform->createElement('cancel', 'cancel', get_string('backtocourse', 'qbank_genai'));

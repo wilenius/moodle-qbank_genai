@@ -47,7 +47,7 @@ class questions extends \core\task\adhoc_task {
 
         // Get the data from the task.
         $data = $this->get_custom_data();
-        $courseid = $data->courseid;
+        // $courseid = $data->courseid;
         $category = $data->category;
         $story = $data->story;
         $userid = $data->userid;
@@ -57,7 +57,7 @@ class questions extends \core\task\adhoc_task {
 
         // Create the DB entry.
         $dbrecord = new \stdClass();
-        $dbrecord->course = $courseid;
+        // $dbrecord->course = $courseid;
         $dbrecord->numoftries = $numoftries;
         $dbrecord->userid = $userid;
         $dbrecord->timecreated = time();
@@ -102,7 +102,7 @@ class questions extends \core\task\adhoc_task {
                 if (\qbank_genai_check_gift($questions->text)) {
 
                     // Create the questions, return an array of objetcs of the created questions.
-                    $created = \qbank_genai_create_questions($courseid, $category, $questions->text, $numofquestions, $userid, $addidentifier);
+                    $created = \qbank_genai_create_questions($category, $questions->text, $numofquestions, $userid, $addidentifier);
                     $j = 0;
                     foreach ($created as $question) {
                         $success[$j]['id'] = $question->id;

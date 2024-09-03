@@ -32,13 +32,61 @@
  */
 function qbank_genai_get_questions($data) {
 
-    global $CFG;
-
     // Build primer.
     $primer = $data->primer;
     $primer .= "Write $data->numofquestions questions.";
 
     $key = get_config('qbank_genai', 'key');
+
+    // Remove new lines and carriage returns.
+    $story = str_replace("\n", " ", $data->story);
+    $story = str_replace("\r", " ", $story);
+    $instructions = str_replace("\n", " ", $data->instructions);
+    $instructions = str_replace("\r", " ", $instructions);
+    $example = str_replace("\n", " ", $data->example);
+    $example = str_replace("\r", " ", $example);
+
+    $messages = [
+        [
+            "role" => "system",
+            "content" => "' . $primer . '",
+        ],
+        [
+            "role" => "system",
+            "name" => "example_user",
+            "content" => "' . $instructions . '",
+        ],
+        [
+            "role" => "system",
+            "name" => "example_assistant",
+            "content" => "' . $example . '",
+        ],
+        [
+            "role" => "user",
+            "content" => 'Now, create ' . $data->numofquestions
+                . ' questions for me based on this topic: "' . qbank_genai_escape_json($story) . '"',
+        ]
+    ];
+
+    if (class_exists('local_ai_manager\manager')) {
+        $ai = new local_ai_manager\manager('genai');
+        $llmresponse = $ai->perform_request("", ['messages' => $messages]);
+        if ($llmresponse->get_code() !== 200) {
+            throw new moodle_exception(
+                'Could not provide feedback by AI tool',
+                '',
+                '',
+                '',
+                $llmresponse->get_errormessage() . ' ' . $llmresponse->get_debuginfo()
+            );
+        }
+        $questions = new stdClass(); // The questions object.
+        $questions->text = $llmresponse->get_content();
+        $questions->prompt = $story;
+        return $questions;
+    }
+
+    // If local_ai_manager is not installed. Use the stand alone mode.
     $model = get_config('qbank_genai', 'model');
     $provider = get_config('qbank_genai', 'provider'); // OpenAI (default) or Azure
 
@@ -51,25 +99,14 @@ function qbank_genai_get_questions($data) {
         $url = 'https://api.openai.com/v1/chat/completions';
         $authorization = "Authorization: Bearer " . $key;
     }
-    // Remove new lines and carriage returns.
-    $story = str_replace("\n", " ", $data->story);
-    $story = str_replace("\r", " ", $story);
-    $instructions = str_replace("\n", " ", $data->instructions);
-    $instructions = str_replace("\r", " ", $instructions);
-    $example = str_replace("\n", " ", $data->example);
-    $example = str_replace("\r", " ", $example);
 
-    $data = '{
-        "model": "' . $model . '",
-        "messages": [
-            {"role": "system", "content": "' . $primer . '"},
-            {"role": "system", "name":"example_user", "content": "' . $instructions . '"},
-            {"role": "system", "name": "example_assistant", "content": "' . $example . '"},
-            {"role": "user", "content": "Now, create ' . $data->numofquestions . ' questions for me based on this topic: ' . qbank_genai_escape_json($story) . '"}
-	    ]}';
+    $data = json_encode([
+        'model' =>  $model,
+        'messages' =>  $messages,
+    ]);
 
     $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json' , $authorization ]);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', $authorization]);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
@@ -91,7 +128,6 @@ function qbank_genai_get_questions($data) {
 /**
  * Create questions from data got from ChatGPT output.
  *
- * @param int $courseid course id
  * @param int $category course category
  * @param string $gift questions in GIFT format
  * @param int $numofquestions number of questions to generate
@@ -99,7 +135,7 @@ function qbank_genai_get_questions($data) {
  * @param bool $addidentifier add an GPT prefix to question names
  * @return array of objects of created questions
  */
-function qbank_genai_create_questions($courseid, $category, $gift, $numofquestions, $userid, $addidentifier) {
+function qbank_genai_create_questions($category, $gift, $numofquestions, $userid, $addidentifier) {
     global $CFG, $USER, $DB;
 
     require_once($CFG->libdir . '/questionlib.php');
@@ -108,7 +144,7 @@ function qbank_genai_create_questions($courseid, $category, $gift, $numofquestio
 
     $qformat = new \qformat_gift();
 
-    $coursecontext = \context_course::instance($courseid);
+    // $coursecontext = \context_course::instance($courseid);
 
     // Get question category TODO: there is probably a better way to do this.
     if ($category) {
@@ -119,12 +155,12 @@ function qbank_genai_create_questions($courseid, $category, $gift, $numofquestio
     }
 
     // Use existing questions category for quiz or create the defaults.
-    if (!$category) {
-        $contexts = new core_question\local\bank\question_edit_contexts($coursecontext);
-        if (!$category = $DB->get_record('question_categories', ['contextid' => $coursecontext->id, 'sortorder' => 999])) {
-            $category = question_make_default_categories($contexts->all());
-        }
-    }
+    // if (!$category) {
+    //     $contexts = new core_question\local\bank\question_edit_contexts($coursecontext);
+    //     if (!$category = $DB->get_record('question_categories', ['contextid' => $coursecontext->id, 'sortorder' => 999])) {
+    //         $category = question_make_default_categories($contexts->all());
+    //     }
+    // }
 
     // Split questions based on blank lines.
     // Then loop through each question and create it.
@@ -133,6 +169,7 @@ function qbank_genai_create_questions($courseid, $category, $gift, $numofquestio
     if (count($questions) != $numofquestions) {
         return false;
     }
+
     $createdquestions = []; // Array of objects of created questions.
     foreach ($questions as $question) {
         $singlequestion = explode("\n", $question);
@@ -140,6 +177,7 @@ function qbank_genai_create_questions($courseid, $category, $gift, $numofquestio
         // Manipulating question text manually for question text field.
         $questiontext = explode('{', $singlequestion[0]);
         $questiontext = trim(preg_replace('/^.*::/', '', $questiontext[0]));
+
         $qtype = 'multichoice';
         $q = $qformat->readquestion($singlequestion);
 
