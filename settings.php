@@ -121,6 +121,19 @@ if ($hassiteconfig) {
             PARAM_TEXT, 4000
         ));
 
+        // Preset format.
+        $formatoptions = [
+            'gift' => 'GIFT format',
+            'moodlexml' => 'Moodle XML format',
+        ];
+        $settings->add( new admin_setting_configselect(
+            'qbank_genai/presetformat' . $i,
+            get_string('presetformat', 'qbank_genai'),
+            get_string('presetformatdesc', 'qbank_genai'),
+            'gift',
+            $formatoptions
+        ));
+
         // Preset example.
         $settings->add( new admin_setting_configtextarea(
             'qbank_genai/presetexample' . $i,
