@@ -193,7 +193,7 @@ function qbank_genai_create_questions($category, $gift, $numofquestions, $userid
         $q->questiontext = ['text' => "<p>" . $questiontext . "</p>"];
         $q->questiontextformat = 1;
         if ($addidentifier == 1) {
-            $q->name = "GPT-created: " . $q->name; // Adds a "watermark" to the question
+            $q->name = "AI-created: " . $q->name; // Adds a "watermark" to the question
         }
         $created = question_bank::get_qtype($qtype)->save_question($q, $q);
         $createdquestions[] = $created;
@@ -204,6 +204,7 @@ function qbank_genai_create_questions($category, $gift, $numofquestions, $userid
         return false;
     }
 }
+
 /**
  * Escape json.
  *

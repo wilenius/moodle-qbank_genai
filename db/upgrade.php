@@ -37,50 +37,30 @@ function xmldb_qbank_genai_upgrade($oldversion) {
     global $DB;
 
     $dbman = $DB->get_manager();
-    if ($oldversion < 2023043001) {
-        // Define table qbank_genai to be created.
+
+    if ($oldversion < 2024090400) {
+
+        // Define index test (not unique) to be dropped form qbank_genai.
         $table = new xmldb_table('qbank_genai');
+        $index = new xmldb_index('courseid', XMLDB_INDEX_NOTUNIQUE, ['courseid']);
 
-        // Adding fields to table.
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('course', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('user', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('gift', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('tries', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
-        $table->add_field('uniqid', XMLDB_TYPE_CHAR, '40', null, null, null, null);
-        $table->add_field('success', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_field('datecreated', XMLDB_TYPE_INTEGER, '20', null, null, null, null);
-        $table->add_field('datemodified', XMLDB_TYPE_INTEGER, '20', null, null, null, null);
-
-        // Adding keys to table qbank_genai.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
-
-        // Conditionally launch create table for qbank_genai.
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
+        // Conditionally launch drop index test.
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
         }
-        upgrade_plugin_savepoint(true, 2023043001, 'local', 'aiquestions');
-    }
 
-    if ($oldversion < 2023050501) {
-        // Add numoftries qbank_genai.
-        $table = new xmldb_table('qbank_genai');
-        $field = new xmldb_field('numoftries', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'tries');
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-        upgrade_plugin_savepoint(true, 2023050501, 'local', 'aiquestions');
-    }
+        // Define field numoftries to be dropped from qbank_genai.
+        $field = new xmldb_field('courseid');
 
-    if ($oldversion < 2023053000) {
-        // Rename user field to userid.
-        $table = new xmldb_table('qbank_genai');
-        $field = new xmldb_field('user', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, 'course');
+        // Conditionally launch drop field numoftries.
         if ($dbman->field_exists($table, $field)) {
-            $dbman->rename_field($table, $field, 'userid');
+            $dbman->drop_field($table, $field);
         }
-        upgrade_plugin_savepoint(true, 2023053000, 'local', 'aiquestions');
+
+        // Genai savepoint reached.
+        upgrade_plugin_savepoint(true, 2024090400, 'qbank', 'genai');
     }
+
 
     return true;
 }
