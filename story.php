@@ -86,8 +86,6 @@ if ($mform->is_cancelled()) {
     $task = new \qbank_genai\task\questions();
     if ($task) {
 
-        \local_debugger\performance\debugger::print_debug('test', 'start', $data);
-
         $uniqid = uniqid($USER->id, true);
 
         $preset = $data->preset;

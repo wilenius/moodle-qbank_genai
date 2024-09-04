@@ -140,6 +140,7 @@ function qbank_genai_get_questions($dataobject) {
  * @param int $userid user id
  * @param bool $addidentifier add an GPT prefix to question names
  * @return array of objects of created questions
+ * @deprecated
  */
 function qbank_genai_create_questions($category, $gift, $numofquestions, $userid, $addidentifier) {
     global $CFG, $USER, $DB;

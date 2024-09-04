@@ -102,6 +102,14 @@ class questions extends \core\task\adhoc_task {
                     break;
 
                 case "xml":
+                    $created = \qbank_genai\local\xml::parse_questions(
+                        $dbrecord->category,
+                        $questions,
+                        $dbrecord->numofquestions,
+                        $dbrecord->userid,
+                        $dbrecord->aiidentifier,
+                        $dbrecord->id
+                    );
                     break;
             }
             $i++;

@@ -81,10 +81,8 @@ class story_form extends \moodleform {
             'History of astro physics between 2000 and 2010',
             'History of astro physics between 2010 and 2020',
             'History of astro physics after 2020',
-
         ];
         $mform->addElement('select', 'courseactivities', get_string('activitylist', 'qbank_genai'), $courseactivities);
-
         $mform->hideif('courseactivities', 'coursecontents');
 
 
