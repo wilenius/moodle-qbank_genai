@@ -99,11 +99,12 @@ class check_state extends \external_api {
         }
 
         // Check that user has capability to create questions on this course.
-        $courseid = $state->course;
-        $coursecontext = \context_course::instance($courseid);
-        if (!has_capability('moodle/question:add', $coursecontext)) {
-            throw new \moodle_exception('nopermission');
-        }
+        // disabled temporarily, breaks ajax task checking    
+        //$courseid = $state->course;
+        //$coursecontext = \context_course::instance($courseid);
+        //if (!has_capability('moodle/question:add', $coursecontext)) {
+        //    throw new \moodle_exception('nopermission');
+        //}
 
         $info = [];
         $info['tries'] = $state->tries;

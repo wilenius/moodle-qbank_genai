@@ -30,7 +30,13 @@ defined('MOODLE_INTERNAL') || die();
 
 core_question\local\bank\helper::require_plugin_enabled('qbank_genai');
 
+
+debugging('The value of \$courseid is: ' . $PAGE->course->id, DEBUG_DEVELOPER);
+
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) = question_edit_setup('import', '/question/bank/aigen/story.php');
+
+
+debugging('The value of \$courseid is: ' . $PAGE->course->id, DEBUG_DEVELOPER);
 
 list($catid, $catcontext) = explode(',', $pagevars['cat']);
 if (!$category = $DB->get_record("question_categories", ['id' => $catid])) {
@@ -74,6 +80,9 @@ if ($mform->is_cancelled()) {
 } else if ($data = $mform->get_data()) {
 
     // Call the adhoc task.
+    // we need the courseid anyway so get it from cmid
+    $cm = get_coursemodule_from_id('', $cmid);
+    $courseid = $cm->course;
     $task = new \qbank_genai\task\questions();
     if ($task) {
         $uniqid = uniqid($USER->id, true);
@@ -89,6 +98,7 @@ if ($mform->is_cancelled()) {
             'story' => $data->story,
             'numofquestions' => $data->numofquestions,
             'addidentifier' => $data->addidentifier,
+            'course' => $courseid,
             'userid' => $USER->id,
             'uniqid' => $uniqid
         ]);
