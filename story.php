@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 
 core_question\local\bank\helper::require_plugin_enabled('qbank_genai');
 
-list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) = question_edit_setup('import', '/question/bank/aigen/story.php');
+list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) = question_edit_setup('import', '/question/bank/genai/story.php');
 
 list($catid, $catcontext) = explode(',', $pagevars['cat']);
 if (!$qbankcategory = $DB->get_record("question_categories", ['id' => $catid])) {
@@ -66,6 +66,12 @@ $PAGE->set_pagelayout('standard');
 $PAGE->requires->js_call_amd('qbank_genai/state');
 
 echo $OUTPUT->header();
+
+// Print horizontal nav if needed.
+$renderer = $PAGE->get_renderer('core_question', 'bank');
+
+$qbankaction = new \core_question\output\qbank_action_menu($thispageurl);
+echo $renderer->render($qbankaction);
 
 $mform = new \qbank_genai\story_form(null, ['contexts' => $contexts, 'cmid' => $cmid]);
 
