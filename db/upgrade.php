@@ -81,6 +81,34 @@ function xmldb_qbank_genai_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024090401, 'qbank', 'genai');
     }
 
+    if ($oldversion < 2024090402) {
+
+        // Define field primer to be added to qbank_genai.
+        $table = new xmldb_table('qbank_genai');
+        $field = new xmldb_field('primer', XMLDB_TYPE_TEXT, null, null, null, null, null, 'uniqid');
+
+        // Conditionally launch add field primer.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('instructions', XMLDB_TYPE_TEXT, null, null, null, null, null, 'primer');
+
+        // Conditionally launch add field instructions.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('example', XMLDB_TYPE_TEXT, null, null, null, null, null, 'instructions');
+
+        // Conditionally launch add field example.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Genai savepoint reached.
+        upgrade_plugin_savepoint(true, 2024090402, 'qbank', 'genai');
+    }
+
 
     return true;
 }
