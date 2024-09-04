@@ -32,7 +32,13 @@ defined('MOODLE_INTERNAL') || die();
 //$edittab = "genai";
 // use "import" for edittab now since capabilities do not exist yet:
 
+
+
+// debugging('The value of \$courseid is: ' . $PAGE->course->id, DEBUG_DEVELOPER); 
+
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) = question_edit_setup('import', '/question/bank/aigen/story.php');
+
+// debugging('The value of \$courseid, post question_edit_setup, is: ' . $PAGE->course->id, DEBUG_DEVELOPER); 
 
 list($catid, $catcontext) = explode(',', $pagevars['cat']);
 if (!$category = $DB->get_record("question_categories", ['id' => $catid])) {

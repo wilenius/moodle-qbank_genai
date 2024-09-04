@@ -41,11 +41,13 @@ class story_form extends \moodleform {
      */
   public function definition() {
 
+        //ATM the form needs courseid, that's why we need the $PAGE object
+        global $PAGE;
         $mform = $this->_form;
         $contexts = $this->_customdata['contexts']->having_cap('moodle/question:add');
 
         // Temp fix to test the plugin
-        $mform->addElement('hidden', 'courseid', 1);
+        $mform->addElement('hidden', 'courseid', $PAGE->course->id);
         $mform->setType('courseid', PARAM_INT);
 
         // Question category.
