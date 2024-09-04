@@ -27,6 +27,8 @@ namespace qbank_genai\task;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__ . '/../../locallib.php');
+
 /**
  * The question generator adhoc task.
  *
@@ -34,40 +36,35 @@ defined('MOODLE_INTERNAL') || die();
  * @category    admin
  */
 class questions extends \core\task\adhoc_task {
+
+    /** @var string identifier of gift qformat */
+    const PARAM_GENAI_GIFT = 'gift';
+
+    /** @var string identifier of xml qformat */
+    const PARAM_GENAI_XML = 'moodlexml';
+
     /**
      * Execute the task.
      *
      * @return void
      */
     public function execute() {
-        global $DB, $CFG;
-        require_once(__DIR__ . '/../../locallib.php');
+        global $DB;
         // Read numoftries from settings.
         $numoftries = get_config('qbank_genai', 'numoftries');
 
         // Get the data from the task.
         $data = $this->get_custom_data();
-        // $courseid = $data->courseid;
-        $category = $data->category;
-        $story = $data->story;
-        $userid = $data->userid;
-        $uniqid = $data->uniqid;
-        $numofquestions = $data->numofquestions;
-        $addidentifier = $data->addidentifier;
 
-        // Create the DB entry.
-        $dbrecord = new \stdClass();
-        // $dbrecord->course = $courseid;
-        $dbrecord->numoftries = $numoftries;
-        $dbrecord->userid = $userid;
-        $dbrecord->timecreated = time();
-        $dbrecord->timemodified = time();
-        $dbrecord->tries = 0;
-        $dbrecord->numoftries = $numoftries;
-        $dbrecord->uniqid = $uniqid;
-        $dbrecord->gift = '';
-        $dbrecord->success = '';
-        $inserted = $DB->insert_record('qbank_genai', $dbrecord);
+        $genaiid = $data->genaiid;
+        mtrace($genaiid);
+        $dbrecord = $DB->get_record('qbank_genai', ['id' => $genaiid]);
+
+        // If there is no record any more, we can drop this process silently. But normally this should not happen.
+        if (empty($dbrecord)) {
+            mtrace("There is no related db record.");
+            return true;
+        }
 
         // Create questions.
         $created = false;
@@ -75,62 +72,46 @@ class questions extends \core\task\adhoc_task {
         $error = ''; // Error message.
         $update = new \stdClass();
 
-        echo "[qbank_genai] Creating Questions via OpenAI...\n";
-        echo "[qbank_genai] Try $i of $numoftries...\n";
+        mtrace("[qbank_genai] Creating Questions with AI...\n");
+        mtrace("[qbank_genai] Try $i of $numoftries...\n");
 
         while (!$created && $i <= $numoftries) {
 
             // First update DB on tries.
-            $update->id = $inserted;
+            $update->id = $genaiid;
             $update->tries = $i;
             $update->datemodified = time();
             $DB->update_record('qbank_genai', $update);
 
-            // Get questions from ChatGPT API.
-            $questions = \qbank_genai_get_questions($data);
+            // Get questions from AI API.
+            $questions = \qbank_genai_get_questions($dbrecord);
 
-            // Print error message of ChatGPT API (if there are).
-            if (isset($questions->error->message)) {
-                $error .= $questions->error->message;
+            $update->llmresponse = $questions->text;
+            $DB->update_record('qbank_genai', $update);
 
-                // Print error message to cron/adhoc output.
-                echo "[qbank_genai] Error : $error.\n";
-            }
+            switch ($dbrecord->qformat) {
+                case "gift":
+                    $created = \qbank_genai\local\gift::parse_questions(
+                        $dbrecord->category,
+                        $questions,
+                        $dbrecord->numofquestions,
+                        $dbrecord->userid,
+                        $dbrecord->aiidentifier,
+                        $dbrecord->id
+                    );
+                    break;
 
-            // Check gift format.
-            if (property_exists($questions, 'text')) {
-                if (\qbank_genai_check_gift($questions->text)) {
-
-                    // Create the questions, return an array of objetcs of the created questions.
-                    $created = \qbank_genai_create_questions($category, $questions->text, $numofquestions, $userid, $addidentifier);
-                    $j = 0;
-                    foreach ($created as $question) {
-                        $success[$j]['id'] = $question->id;
-                        $success[$j]['questiontext'] = $question->questiontext;
-                        $j++;
-                    }
-
-                    echo "[qbank_genai] Successfully created $j questions!\n";
-
-                    // Insert success creation info to DB.
-                    $update->id = $inserted;
-                    $update->gift = $questions->text;
-                    $update->tries = $i;
-                    $update->success = json_encode(array_values($success));
-                    $update->datemodified = time();
-                    $DB->update_record('qbank_genai', $update);
-                }
-            } else {
-                echo "[qbank_genai] Error: No question text returned \n";
+                case "xml":
+                    break;
             }
             $i++;
+
         }
 
         // If questions were not created.
         if (!$created) {
             // Insert error info to DB.
             $update = new \stdClass();
-            $update->id = $inserted;
             $update->tries = $i - 1;
             $update->timemodified = time();
             $update->success = 0;

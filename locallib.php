@@ -27,23 +27,23 @@
 /**
  * Get questions from the API.
  *
- * @param object data data to create questions from
+ * @param object $dataobject of the stored processing data from genai db table extended with example data.
  * @return object questions of generated questions
  */
-function qbank_genai_get_questions($data) {
+function qbank_genai_get_questions($dataobject) {
 
     // Build primer.
-    $primer = $data->primer;
-    $primer .= "Write $data->numofquestions questions.";
+    $primer = $dataobject->primer;
+    $primer .= "Write $dataobject->numofquestions questions.";
 
     $key = get_config('qbank_genai', 'key');
 
     // Remove new lines and carriage returns.
-    $story = str_replace("\n", " ", $data->story);
+    $story = str_replace("\n", " ", $dataobject->story);
     $story = str_replace("\r", " ", $story);
-    $instructions = str_replace("\n", " ", $data->instructions);
+    $instructions = str_replace("\n", " ", $dataobject->instructions);
     $instructions = str_replace("\r", " ", $instructions);
-    $example = str_replace("\n", " ", $data->example);
+    $example = str_replace("\n", " ", $dataobject->example);
     $example = str_replace("\r", " ", $example);
 
     $messages = [
@@ -63,7 +63,7 @@ function qbank_genai_get_questions($data) {
         ],
         [
             "role" => "user",
-            "content" => 'Now, create ' . $data->numofquestions
+            "content" => 'Now, create ' . $dataobject->numofquestions
                 . ' questions for me based on this topic: "' . qbank_genai_escape_json($story) . '"',
         ]
     ];
@@ -73,10 +73,7 @@ function qbank_genai_get_questions($data) {
         $llmresponse = $ai->perform_request("", ['messages' => $messages]);
         if ($llmresponse->get_code() !== 200) {
             throw new moodle_exception(
-                'Could not provide feedback by AI tool',
-                '',
-                '',
-                '',
+                'Could not provide questions by AI tool', '', '', '',
                 $llmresponse->get_errormessage() . ' ' . $llmresponse->get_debuginfo()
             );
         }
@@ -123,6 +120,15 @@ function qbank_genai_get_questions($data) {
         $questions = $result;
         $questions->prompt = $story;
     }
+
+    // Print error message of ChatGPT API (if there are).
+    if (isset($questions->error->message)) {
+        $error = $questions->error->message;
+
+        // Print error message to cron/adhoc output.
+        echo "[qbank_genai] Error : $error.\n";
+    }
+
     return $questions;
 }
 /**
@@ -140,9 +146,6 @@ function qbank_genai_create_questions($category, $gift, $numofquestions, $userid
 
     require_once($CFG->libdir . '/questionlib.php');
     require_once($CFG->dirroot . '/question/format.php');
-    require_once($CFG->dirroot . '/question/format/gift/format.php');
-
-    $qformat = new \qformat_gift();
 
     // $coursecontext = \context_course::instance($courseid);
 
@@ -154,6 +157,18 @@ function qbank_genai_create_questions($category, $gift, $numofquestions, $userid
         $category = $DB->get_record('question_categories', ['id' => $categoryid, 'contextid' => $categorycontextid]);
     }
 
+    // $classname = "\qbank_genai\local\\" . $page->tool;
+    // if (!class_exists($classname)) {
+    //     throw new \coding_exception('The  ' . $key . ' is not allowed for the purpose ' .
+    //         $this->purpose->get_plugin_name());
+    // }
+    // $toolhelper = new $classname();
+    // if (!method_exists($toolhelper, 'hook_after_new_page_created')) {
+    //     return "Method 'get_answer_column' is missing in tool helper class " . $page->tool;
+    // }
+
+    // \qbank_genai\local\gift::parse_questions()
+
     // Use existing questions category for quiz or create the defaults.
     // if (!$category) {
     //     $contexts = new core_question\local\bank\question_edit_contexts($coursecontext);
@@ -164,40 +179,7 @@ function qbank_genai_create_questions($category, $gift, $numofquestions, $userid
 
     // Split questions based on blank lines.
     // Then loop through each question and create it.
-    $questions = explode("\n\n", $gift);
 
-    if (count($questions) != $numofquestions) {
-        return false;
-    }
-
-    $createdquestions = []; // Array of objects of created questions.
-    foreach ($questions as $question) {
-        $singlequestion = explode("\n", $question);
-
-        // Manipulating question text manually for question text field.
-        $questiontext = explode('{', $singlequestion[0]);
-        $questiontext = trim(preg_replace('/^.*::/', '', $questiontext[0]));
-
-        $qtype = 'multichoice';
-        $q = $qformat->readquestion($singlequestion);
-
-        // Check if question is valid.
-        if (!$q) {
-            return false;
-        }
-        $q->category = $category->id;
-        $q->createdby = $userid;
-        $q->modifiedby = $userid;
-        $q->timecreated = time();
-        $q->timemodified = time();
-        $q->questiontext = ['text' => "<p>" . $questiontext . "</p>"];
-        $q->questiontextformat = 1;
-        if ($addidentifier == 1) {
-            $q->name = "AI-created: " . $q->name; // Adds a "watermark" to the question
-        }
-        $created = question_bank::get_qtype($qtype)->save_question($q, $q);
-        $createdquestions[] = $created;
-    }
     if ($created) {
         return $createdquestions;
     } else {

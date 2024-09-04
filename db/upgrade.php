@@ -109,6 +109,40 @@ function xmldb_qbank_genai_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024090402, 'qbank', 'genai');
     }
 
+    if ($oldversion < 2024090403) {
+
+        // Define field numofquestions to be added to qbank_genai.
+        $table = new xmldb_table('qbank_genai');
+
+        $field = new xmldb_field('numofquestions', XMLDB_TYPE_INTEGER, '5', null, null, null, null, 'qformat');
+        // Conditionally launch add field numofquestions.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('aiidentifier', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'timemodified');
+        // Conditionally launch add field aiidentifier.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('story', XMLDB_TYPE_TEXT, null, null, null, null, null, 'numofquestions');
+        // Conditionally launch add field story.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('category', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'numofquestions');
+        // Conditionally launch add field category.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Genai savepoint reached.
+        upgrade_plugin_savepoint(true, 2024090403, 'qbank', 'genai');
+    }
+
+
 
     return true;
 }

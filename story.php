@@ -39,12 +39,12 @@ list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) = question_edit_se
 debugging('The value of \$courseid is: ' . $PAGE->course->id, DEBUG_DEVELOPER);
 
 list($catid, $catcontext) = explode(',', $pagevars['cat']);
-if (!$category = $DB->get_record("question_categories", ['id' => $catid])) {
+if (!$qbankcategory = $DB->get_record("question_categories", ['id' => $catid])) {
     throw new moodle_exception('nocategory', 'question');
 }
 
-$categorycontext = context::instance_by_id($category->contextid);
-$category->context = $categorycontext;
+$categorycontext = context::instance_by_id($qbankcategory->contextid);
+$qbankcategory->context = $categorycontext;
 
 // This page can be called without courseid or cmid in which case.
 // We get the context from the category object.
@@ -85,21 +85,43 @@ if ($mform->is_cancelled()) {
     $courseid = $cm->course;
     $task = new \qbank_genai\task\questions();
     if ($task) {
+
+        \local_debugger\performance\debugger::print_debug('test', 'start', $data);
+
         $uniqid = uniqid($USER->id, true);
+
         $preset = $data->preset;
-        $primer = 'primer' . $preset;
-        $instructions = 'instructions' . $preset;
-        $example = 'example' . $preset;
+
+        // Create the DB entry.
+        $dbrecord = new \stdClass();
+        // $dbrecord->course = $courseid;
+        $dbrecord->numoftries = get_config('qbank_genai', 'numoftries');
+        $dbrecord->numofquestions = $data->numofquestions;
+        $dbrecord->aiidentifier = $data->addidentifier;
+        $dbrecord->category = $qbankcategory->id;
+        $dbrecord->userid = $USER->id;
+        $dbrecord->qformat = $data->presetformat;
+        $dbrecord->timecreated = time();
+        $dbrecord->timemodified = 0;
+        $dbrecord->tries = 0;
+        $dbrecord->story = $data->story;
+        $dbrecord->uniqid = $uniqid;
+        $dbrecord->llmresponse = '';
+        $dbrecord->success = '';
+        $dbrecord->primer = $data->{'primer' . $preset};
+        $dbrecord->instructions = $data->{'instructions' . $preset};
+        $dbrecord->example = $data->{'example' . $preset};
+
+        $inserted = $DB->insert_record('qbank_genai', $dbrecord);
+
+        if ($inserted == 0) {
+            throw new \moodle_exception('There was an error when storing the genai processing data to db.');
+        }
+        $dbrecord->id = $inserted;
+
+
         $task->set_custom_data([
-            'category' => $data->category,
-            'primer' => $data->$primer,
-            'instructions' => $data->$instructions,
-            'example' => $data->$example,
-            'story' => $data->story,
-            'numofquestions' => $data->numofquestions,
-            'addidentifier' => $data->addidentifier,
-            'course' => $courseid,
-            'userid' => $USER->id,
+            'genaiid' => $dbrecord->id,
             'uniqid' => $uniqid
         ]);
         \core\task\manager::queue_adhoc_task($task);

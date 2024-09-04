@@ -29,10 +29,11 @@ if ($hassiteconfig) {
     $settings = new admin_settingpage('qbank_genai_settings', new lang_string('pluginname', 'qbank_genai'));
 
     // Language model provider.
-    $provideroptions = ['OpenAI' => 'OpenAI',
-                'Azure' => 'Azure',
-                ];
-    $settings->add( new admin_setting_configselect(
+    $provideroptions = [
+        'OpenAI' => 'OpenAI',
+        'Azure' => 'Azure',
+    ];
+    $settings->add(new admin_setting_configselect(
         'qbank_genai/provider',
         get_string('provider', 'qbank_genai'),
         get_string('providerdesc', 'qbank_genai'),
@@ -43,26 +44,31 @@ if ($hassiteconfig) {
     // Azure endpoint.
 
     $settings->add(new admin_setting_configtext(
-    'qbank_genai/azure_api_endpoint',
-    get_string('azureapiendpoint', 'qbank_genai'),
-    get_string('azureapiendpointdesc', 'qbank_genai'),
-    '', PARAM_URL
+        'qbank_genai/azure_api_endpoint',
+        get_string('azureapiendpoint', 'qbank_genai'),
+        get_string('azureapiendpointdesc', 'qbank_genai'),
+        '',
+        PARAM_URL
     ));
 
 
     // OpenAI key.
-    $settings->add( new admin_setting_configpasswordunmask(
+    $settings->add(new admin_setting_configpasswordunmask(
         'qbank_genai/key',
         get_string('openaikey', 'qbank_genai'),
         get_string('openaikeydesc', 'qbank_genai'),
-        '', PARAM_TEXT, 50
+        '',
+        PARAM_TEXT,
+        50
     ));
 
     // Model.
-    $options = ['gpt-3.5-turbo' => 'gpt-3.5-turbo',
-                'gpt-4' => 'gpt-4',
-                ];
-    $settings->add( new admin_setting_configselect(
+    $options = [
+        'gpt-3.5-turbo' => 'gpt-3.5-turbo',
+        'gpt-4' => 'gpt-4',
+        'gpt-4o' => 'gpt-4o',
+    ];
+    $settings->add(new admin_setting_configselect(
         'qbank_genai/model',
         get_string('model', 'qbank_genai'),
         get_string('openaikeydesc', 'qbank_genai'),
@@ -71,32 +77,34 @@ if ($hassiteconfig) {
     ));
 
     // Number of tries.
-    $settings->add( new admin_setting_configtext(
+    $settings->add(new admin_setting_configtext(
         'qbank_genai/numoftries',
         get_string('numoftriesset', 'qbank_genai'),
         get_string('numoftriesdesc', 'qbank_genai'),
-        10, PARAM_INT, 10
+        10,
+        PARAM_INT,
+        10
     ));
 
     // Presets
-    $settings->add( new admin_setting_heading(
+    $settings->add(new admin_setting_heading(
         'qbank_genai/presets',
         get_string('presets', 'qbank_genai'),
         get_string('presetsdesc', 'qbank_genai') .
-        get_string('shareyourprompts', 'qbank_genai'),
+            get_string('shareyourprompts', 'qbank_genai'),
     ));
 
     for ($i = 1; $i <= 10; $i++) {
 
         // Preset header.
-        $settings->add( new admin_setting_heading(
+        $settings->add(new admin_setting_heading(
             'qbank_genai/preset' . $i,
             get_string('preset', 'qbank_genai') . " $i",
             null
         ));
 
         // Preset name.
-        $settings->add( new admin_setting_configtext(
+        $settings->add(new admin_setting_configtext(
             'qbank_genai/presetname' . $i,
             get_string('presetname', 'qbank_genai'),
             get_string('presetnamedesc', 'qbank_genai'),
@@ -104,21 +112,23 @@ if ($hassiteconfig) {
         ));
 
         // Preset primer.
-        $settings->add( new admin_setting_configtextarea(
+        $settings->add(new admin_setting_configtextarea(
             'qbank_genai/presettprimer' . $i,
             get_string('presetprimer', 'qbank_genai'),
             get_string('primer_help', 'qbank_genai'),
             get_string('presetprimerdefault' . $i, 'qbank_genai'),
-            PARAM_TEXT, 4000
+            PARAM_TEXT,
+            4000
         ));
 
         // Preset instructions.
-        $settings->add( new admin_setting_configtextarea(
+        $settings->add(new admin_setting_configtextarea(
             'qbank_genai/presetinstructions' . $i,
             get_string('presetinstructions', 'qbank_genai'),
             get_string('instructions_help', 'qbank_genai'),
             get_string('presetinstructionsdefault' . $i, 'qbank_genai'),
-            PARAM_TEXT, 4000
+            PARAM_TEXT,
+            4000
         ));
 
         // Preset format.
@@ -135,14 +145,14 @@ if ($hassiteconfig) {
         ));
 
         // Preset example.
-        $settings->add( new admin_setting_configtextarea(
+        $settings->add(new admin_setting_configtextarea(
             'qbank_genai/presetexample' . $i,
             get_string('presetexample', 'qbank_genai'),
             get_string('example_help', 'qbank_genai'),
             get_string('presetexampledefault' . $i, 'qbank_genai'),
-            PARAM_TEXT, 4000
+            PARAM_TEXT,
+            4000
         ));
-
     }
 
     $ADMIN->add('localplugins', $settings);
