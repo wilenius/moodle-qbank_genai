@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__.'/upgradelib.php');
+require_once(__DIR__ . '/upgradelib.php');
 
 /**
  * Execute qbank_genai upgrade from the given old version.
@@ -59,6 +59,26 @@ function xmldb_qbank_genai_upgrade($oldversion) {
 
         // Genai savepoint reached.
         upgrade_plugin_savepoint(true, 2024090400, 'qbank', 'genai');
+    }
+
+    if ($oldversion < 2024090401) {
+
+        // Rename field gift on table qbank_genai to llmresponse.
+        $table = new xmldb_table('qbank_genai');
+        $field = new xmldb_field('gift', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null, 'userid');
+
+        // Launch rename field gift.
+        $dbman->rename_field($table, $field, 'llmresponse');
+
+        // Now add a new database field.
+        $field = new xmldb_field('qformat', XMLDB_TYPE_CHAR, '100', null, null, null, null, 'id');
+
+        // Conditionally launch add field qformat.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Genai savepoint reached.
+        upgrade_plugin_savepoint(true, 2024090401, 'qbank', 'genai');
     }
 
 
