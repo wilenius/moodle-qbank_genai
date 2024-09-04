@@ -38,7 +38,7 @@ $functions = [
 
 // Define the services and functions.
 $services = [
-    'AI Questions Services' => [
+    'AI Questions Service' => [
             'functions' => ['qbank_genai_check_state'],
             'restrictedusers' => 0,
             'enabled' => 1,
