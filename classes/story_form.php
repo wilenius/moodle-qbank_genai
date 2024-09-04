@@ -39,10 +39,14 @@ class story_form extends \moodleform {
     /**
      * Defines forms elements
      */
-    public function definition() {
+  public function definition() {
 
         $mform = $this->_form;
         $contexts = $this->_customdata['contexts']->having_cap('moodle/question:add');
+
+        // Temp fix to test the plugin
+        $mform->addElement('hidden', 'courseid', 1);
+        $mform->setType('courseid', PARAM_INT);
 
         // Question category.
         $mform->addElement('questioncategory', 'category', get_string('category', 'question'), ['contexts' => $contexts]);

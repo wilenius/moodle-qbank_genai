@@ -28,7 +28,9 @@ require_once($CFG->dirroot . '/question/editlib.php');
 
 defined('MOODLE_INTERNAL') || die();
 
-core_question\local\bank\helper::require_plugin_enabled('qbank_importquestions');
+//core_question\local\bank\helper::require_plugin_enabled('qbank_importquestions');
+//$edittab = "genai";
+// use "import" for edittab now since capabilities do not exist yet:
 
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) = question_edit_setup('import', '/question/bank/aigen/story.php');
 
