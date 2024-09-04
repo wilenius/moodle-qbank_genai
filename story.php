@@ -30,13 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 
 core_question\local\bank\helper::require_plugin_enabled('qbank_genai');
 
-
-debugging('The value of \$courseid is: ' . $PAGE->course->id, DEBUG_DEVELOPER);
-
 list($thispageurl, $contexts, $cmid, $cm, $module, $pagevars) = question_edit_setup('import', '/question/bank/aigen/story.php');
-
-
-debugging('The value of \$courseid is: ' . $PAGE->course->id, DEBUG_DEVELOPER);
 
 list($catid, $catcontext) = explode(',', $pagevars['cat']);
 if (!$qbankcategory = $DB->get_record("question_categories", ['id' => $catid])) {

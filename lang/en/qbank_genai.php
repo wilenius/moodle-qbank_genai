@@ -33,6 +33,8 @@ $string['pluginname_help'] = 'Use this plugin from the course administration men
 $string['privacy:metadata'] = 'AI text to questions generator does not store any personal data.';
 $string['gift_format'] = 'GIFT format';
 $string['xml_format'] = 'Moodle XML format';
+$string['use_coursecontents'] = 'Use course contents as topic instead';
+$string['activitylist'] = 'List of activities';
 
 // Settings page.
 $string['provider'] = 'GPT provider';
