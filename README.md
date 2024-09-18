@@ -1,45 +1,10 @@
-# AI Text to questions generator #
+# GenAI question generator #
 
-This plugin allows you to automatically create questions on a given text using OpenAI ChatGPT. It requires an OpenAI API Key.
+This plugin allows you to automatically create questions on a given text using a large language model. It requires an OpenAI or Azure API Key, or the local_ai_manager plugin (https://github.com/mebis-lp/moodle-local_ai_manager). It's a fork of the "AI Text to questions generator" created byt Yedidia Klein and Ruthy Salomon.
 
-## Installing via uploaded ZIP file ##
-
-1. Log in to your Moodle site as an admin and go to _Site administration >
-   Plugins > Install plugins_.
-2. Upload the ZIP file with the plugin code. You should only be prompted to add
-   extra details if your plugin type is not automatically detected.
-3. Check the plugin validation report and finish the installation.
-
-## Installing manually ##
-
-The plugin can be also installed by putting the contents of this directory to
-
-    {your/moodle/dirroot}/local/aiquestions
-
-Afterwards, log in to your Moodle site as an admin and go to _Site administration >
-Notifications_ to complete the installation.
-
-Alternatively, you can run
-
-    $ php admin/cli/upgrade.php
-
-to complete the installation from the command line.
-
-## Usage
-
-- In a course, or in the question bank of a course, you can find the new menu point **Ai Questions** in the secondary navigation.
-- Select a preset and enter the topic of your questions. You can also modify the preset data if you want.
-
-## Presets
-
-- Presets can be edited by the administrator in the module's settings.
-- Users can modify presets before creating questions.
-- Share your presets at the Moodle Docs page for this plugin: https://docs.moodle.org/402/en/AI_Text_to_questions_generator.
-
+The plugin is work-in-progress, and not ready for production yet.
 
 ## License ##
-
-2023 Ruthy Salomon <ruthy.salomon@gmail.com> , Yedidia Klein <yedidia@openapp.co.il>
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
