@@ -4,6 +4,8 @@ This plugin allows you to automatically create questions on a given text using a
 
 The plugin is work-in-progress, and not ready for production yet.
 
+![Image of Qbank Genai menu](./docs/images/qbank_genai.png)
+
 ## License ##
 
 This program is free software: you can redistribute it and/or modify it under
